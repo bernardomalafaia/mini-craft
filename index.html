@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Craft Criativo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== CABEÇALHO ===== -->
+  <header>
+    <h1>Mini Craft Criativo</h1>
+    <p>
+      Um jogo de construção inspirado no modo criativo dos jogos de blocos:
+      aqui você tem blocos infinitos, não existe perigo e a única regra é usar a imaginação!
+    </p>
+    <!-- Imagem relacionada ao tema (um bloco desenhado em SVG).
+         Para usar uma foto sua, troque o valor de src pelo nome do arquivo na pasta, ex: src="bloco.png" -->
+    <img class="logo" alt="Desenho de um bloco de grama" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,8 90,30 50,52 10,30' fill='%235cb338'/%3E%3Cpolygon points='10,30 50,52 50,94 10,72' fill='%238b5a2b'/%3E%3Cpolygon points='90,30 50,52 50,94 90,72' fill='%236e4620'/%3E%3C/svg%3E">
+  </header>
+
+  <main>
+
+    <!-- ===== ÁREA DO JOGO ===== -->
+    <section class="jogo">
+      <h2>Jogue aqui</h2>
+
+      <div class="tela" id="tela">
+        <!-- nuvens decorativas (animadas no CSS) -->
+        <div class="nuvem n1"></div>
+        <div class="nuvem n2"></div>
+
+        <!-- o mundo: o JavaScript cria os quadradinhos (blocos) dentro desta div -->
+        <div class="mundo" id="mundo"></div>
+
+        <!-- MENU INICIAL (fica por cima do jogo) -->
+        <div class="menu" id="menu">
+          <h2 class="menu-titulo">Mini Craft</h2>
+          <p id="menu-msg">Escolha uma opção para começar:</p>
+          <button class="botao" id="btn-iniciar">▶ Iniciar</button>
+          <button class="botao botao-verde" id="btn-novo">✚ Criar novo mundo</button>
+        </div>
+      </div>
+
+      <!-- BARRA DE FERRAMENTAS (aparece depois de iniciar) -->
+      <div class="barra" id="barra">
+        <div class="ferramentas">
+          <button class="botao pequeno ativo" id="btn-colocar">🧱 Colocar</button>
+          <button class="botao pequeno" id="btn-quebrar">⛏ Quebrar</button>
+          <button class="botao pequeno" id="btn-menu">☰ Menu</button>
+        </div>
+        <!-- os blocos para escolher são criados pelo JavaScript -->
+        <div class="blocos" id="blocos"></div>
+      </div>
+
+      <p class="dica">
+        Dica: clique (ou toque) num quadrado para colocar ou quebrar um bloco.
+        No computador, o botão direito do mouse quebra e as teclas 1 a 9 escolhem o bloco.
+      </p>
+    </section>
+
+    <!-- ===== VÍDEO ===== -->
+    <section class="video">
+      <h2>Inspire-se</h2>
+      <p>Assista a um vídeo sobre construções no modo criativo:</p>
+      <div class="video-caixa">
+        <!-- TROQUE "COLE_O_ID_DO_VIDEO" pelo código do vídeo escolhido pelo grupo.
+             No YouTube: Compartilhar > Incorporar, e copie o endereço que está dentro de src="..." -->
+        <iframe src="Mini_Craft_Criativo.mp4"
+                title="Vídeo sobre o modo criativo"
+                allowfullscreen></iframe>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Projeto escolar de HTML e CSS — feito pelo grupo.</p>
+  </footer>
+
+  <!-- =====================================================
+       JAVASCRIPT (o "cérebro" do jogo)
+       Fica no próprio index.html para o projeto ter só 2 arquivos.
+       ===================================================== -->
+  <script>
+    // ---------- 1. Configurações ----------
+    const COLUNAS = 32;          // quantos blocos na largura
+    const LINHAS = 18;           // quantos blocos na altura
+    const NIVEL_DO_MAR = 11;     // linha onde começa a água
+
+    // Lista de blocos disponíveis (o "id" é o nome da classe no CSS)
+    const BLOCOS = [
+  // Blocos Originais
+  { id: "grama",        nome: "Grama" },
+  { id: "terra",        nome: "Terra" },
+  { id: "pedra",        nome: "Pedra" },
+  { id: "madeira",      nome: "Madeira" },
+  { id: "folhas",       nome: "Folhas" },
+  { id: "areia",        nome: "Areia" },
+  { id: "tijolo",       nome: "Tijolo" },
+  { id: "vidro",        nome: "Vidro" },
+  { id: "agua",         nome: "Água" },
+
+  // Novos Blocos Naturais
+  { id: "neve",         nome: "Neve" },
+  { id: "cacto",        nome: "Cacto" },
+  { id: "argila",       nome: "Argila Terracota" },
+  { id: "tronco-claro", nome: "Bétula (Madeira Clara)" },
+
+  // Novos Blocos Coloridos e Minérios
+  { id: "ouro",         nome: "Ouro" },
+  { id: "diamante",     nome: "Diamante" },
+  { id: "lapis",        nome: "Lápis-Lazúli" },
+  { id: "lava",         nome: "Lava" },
+  { id: "cogumelo",     nome: "Cogumelo Vermelho" }
+];
+
+    // ---------- 2. Variáveis do jogo ----------
+    let mundo = [];              // guarda o tipo de cada bloco ("" = vazio/ar)
+    let blocoAtual = "grama";    // bloco escolhido
+    let modo = "colocar";        // "colocar" ou "quebrar"
+
+    // ---------- 3. Pegando elementos da página ----------
+    const elMundo   = document.getElementById("mundo");
+    const elMenu    = document.getElementById("menu");
+    const elBarra   = document.getElementById("barra");
+    const elBlocos  = document.getElementById("blocos");
+    const elMsg     = document.getElementById("menu-msg");
+    const btnIniciar = document.getElementById("btn-iniciar");
+    const btnNovo    = document.getElementById("btn-novo");
+    const btnColocar = document.getElementById("btn-colocar");
+    const btnQuebrar = document.getElementById("btn-quebrar");
+    const btnMenu    = document.getElementById("btn-menu");
+
+    // ---------- 4. Criar os quadradinhos do mundo ----------
+    for (let i = 0; i < COLUNAS * LINHAS; i++) {
+      const celula = document.createElement("div");
+      celula.className = "celula";
+      celula.dataset.i = i;      // guarda o número do quadrado
+      elMundo.appendChild(celula);
+    }
+
+    // ---------- 5. Criar os botões de escolher bloco ----------
+    BLOCOS.forEach(function (b, numero) {
+      const botao = document.createElement("button");
+      botao.className = "item celula " + b.id;
+      botao.title = (numero + 1) + " - " + b.nome;
+      botao.dataset.bloco = b.id;
+      botao.addEventListener("click", function () { escolherBloco(b.id); });
+      elBlocos.appendChild(botao);
+    });
+
+    function escolherBloco(id) {
+      blocoAtual = id;
+      mudarModo("colocar");
+      document.querySelectorAll(".item").forEach(function (el) {
+        el.classList.toggle("ativo", el.dataset.bloco === id);
+      });
+    }
+
+    function mudarModo(novoModo) {
+      modo = novoModo;
+      btnColocar.classList.toggle("ativo", modo === "colocar");
+      btnQuebrar.classList.toggle("ativo", modo === "quebrar");
+    }
+
+    // ---------- 6. Desenhar o mundo na tela ----------
+    function desenhar() {
+      const celulas = elMundo.children;
+      for (let i = 0; i < mundo.length; i++) {
+        celulas[i].className = "celula " + mundo[i];
+      }
+    }
+
+    // ---------- 7. Gerar um mundo novo (terreno aleatório) ----------
+    function gerarMundo() {
+      mundo = new Array(COLUNAS * LINHAS).fill("");
+      const fase1 = Math.random() * 10;
+      const fase2 = Math.random() * 10;
+      let ultimaArvore = -10;
+
+      for (let c = 0; c < COLUNAS; c++) {
+        // altura do chão nessa coluna (usa seno para fazer colinas)
+        let topo = Math.round(10 + Math.sin(c * 0.35 + fase1) * 2 + Math.sin(c * 0.12 + fase2) * 2);
+        topo = Math.max(6, Math.min(14, topo));
+
+        const praia = topo >= NIVEL_DO_MAR;   // chão baixo = areia + água
+
+        for (let l = topo; l < LINHAS; l++) {
+          let tipo = "pedra";
+          if (l === topo)            tipo = praia ? "areia" : "grama";
+          else if (l <= topo + 3)    tipo = praia ? "areia" : "terra";
+          mundo[l * COLUNAS + c] = tipo;
+        }
+
+        // enche de água os buracos abaixo do nível do mar
+        for (let l = NIVEL_DO_MAR; l < topo; l++) {
+          mundo[l * COLUNAS + c] = "agua";
+        }
+
+        // às vezes nasce uma árvore
+        if (!praia && c > 1 && c < COLUNAS - 2 && c - ultimaArvore > 4 && Math.random() < 0.3) {
+          plantarArvore(c, topo);
+          ultimaArvore = c;
+        }
+      }
+    }
+
+    function plantarArvore(c, topo) {
+      const altura = 3 + Math.floor(Math.random() * 2);  // 3 ou 4 blocos
+      // copa (folhas)
+      for (let dl = -2; dl <= 0; dl++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const l = topo - altura + dl;
+          if (l >= 0) mundo[l * COLUNAS + (c + dc)] = "folhas";
+        }
+      }
+      // tronco
+      for (let k = 1; k <= altura; k++) {
+        mundo[(topo - k) * COLUNAS + c] = "madeira";
+      }
+    }
+
+    // ---------- 8. Salvar e carregar (fica guardado no navegador) ----------
+    function salvar() {
+      try { localStorage.setItem("minicraft-mundo", JSON.stringify(mundo)); } catch (e) {}
+    }
+
+    function carregar() {
+      try {
+        const texto = localStorage.getItem("minicraft-mundo");
+        if (!texto) return false;
+        const dados = JSON.parse(texto);
+        if (dados.length !== COLUNAS * LINHAS) return false;
+        mundo = dados;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // ---------- 9. Entrar e sair do jogo ----------
+    function comecar() {
+      elMenu.classList.add("escondido");
+      elBarra.classList.add("visivel");
+      desenhar();
+    }
+
+    btnIniciar.addEventListener("click", function () {
+      if (!carregar()) {          // se não tem mundo salvo, cria um
+        gerarMundo();
+        salvar();
+      }
+      comecar();
+    });
+
+    btnNovo.addEventListener("click", function () {
+      gerarMundo();
+      salvar();
+      comecar();
+    });
+
+    btnMenu.addEventListener("click", function () {
+      elMsg.textContent = "Jogo pausado. Seu mundo está salvo!";
+      elMenu.classList.remove("escondido");
+      elBarra.classList.remove("visivel");
+    });
+
+    btnColocar.addEventListener("click", function () { mudarModo("colocar"); });
+    btnQuebrar.addEventListener("click", function () { mudarModo("quebrar"); });
+
+    // ---------- 10. Colocar e quebrar blocos ----------
+    function agir(i, quebrar) {
+      mundo[i] = quebrar ? "" : blocoAtual;
+      desenhar();
+      salvar();
+    }
+
+    elMundo.addEventListener("click", function (evento) {
+      const celula = evento.target.closest(".celula");
+      if (!celula) return;
+      agir(Number(celula.dataset.i), modo === "quebrar");
+    });
+
+    // botão direito do mouse = quebrar
+    elMundo.addEventListener("contextmenu", function (evento) {
+      evento.preventDefault();
+      const celula = evento.target.closest(".celula");
+      if (!celula) return;
+      agir(Number(celula.dataset.i), true);
+    });
+
+    // teclas 1 a 9 escolhem o bloco
+    document.addEventListener("keydown", function (evento) {
+      const numero = Number(evento.key);
+      if (numero >= 1 && numero <= BLOCOS.length) {
+        escolherBloco(BLOCOS[numero - 1].id);
+      }
+    });
+
+    // ---------- 11. Início ----------
+    escolherBloco("grama");
+    if (carregar()) {
+      elMsg.textContent = "Encontramos um mundo salvo. Quer continuar?";
+    }
+    desenhar();
+  </script>
+
+</body>
+</html>

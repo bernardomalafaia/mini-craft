@@ -1,0 +1,294 @@
+/* =====================================================
+   MINI CRAFT CRIATIVO - style.css
+   ===================================================== */
+
+/* ---------- Geral ---------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  background-color: #2b2b2b;
+  background-image: linear-gradient(#3a3a3a, #1f1f1f);
+  color: #ffffff;
+  text-align: center;
+}
+
+/* ---------- Cabeçalho ---------- */
+header {
+  padding: 24px 16px 8px;
+}
+
+h1 {
+  font-family: "Courier New", monospace;
+  font-size: 2.6rem;
+  color: #7bd34a;
+  text-shadow: 4px 4px 0 #1b4d0f;
+  margin: 0 0 8px;
+  animation: flutuar 2.5s ease-in-out infinite;   /* título "flutuando" */
+}
+
+h2 {
+  font-family: "Courier New", monospace;
+  color: #ffd54a;
+  text-shadow: 2px 2px 0 #7a5a00;
+}
+
+p {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  max-width: 700px;
+  margin: 8px auto;
+}
+
+/* imagem do bloco */
+.logo {
+  width: 110px;
+  height: 110px;
+  margin-top: 8px;
+  animation: girar 4s ease-in-out infinite;
+}
+
+/* ---------- Área do jogo ---------- */
+main {
+  padding: 8px 12px 24px;
+}
+
+.tela {
+  position: relative;               /* para o menu ficar por cima */
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  aspect-ratio: 32 / 18;
+  overflow: hidden;
+  border: 6px solid #5a3a1a;
+  border-radius: 6px;
+  background: linear-gradient(#6ec6ff 0%, #bfe9ff 100%);   /* céu */
+}
+
+/* o mundo é uma grade 32 x 18 */
+.mundo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(32, 1fr);
+  grid-template-rows: repeat(18, 1fr);
+}
+
+/* ---------- Blocos ---------- */
+.celula {
+  border: 0;
+  padding: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);   /* linhazinha entre os blocos */
+  cursor: pointer;
+}
+
+.celula:hover {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: -2px;
+}
+
+.grama   { background: linear-gradient(#5cb338 0 30%, #8b5a2b 30% 100%); }
+.terra   { background: #8b5a2b; }
+.pedra   { background: #8a8a8a; }
+.madeira { background: repeating-linear-gradient(90deg, #a0692f 0 4px, #8a5524 4px 8px); }
+.folhas  { background: #2e8b2e; box-shadow: inset 0 0 0 2px #226b22; }
+.areia   { background: #e6d38a; }
+.tijolo  { background: linear-gradient(#b5462f 0 45%, #d9d2c5 45% 55%, #b5462f 55% 100%); }
+.vidro   { background: rgba(190, 235, 255, 0.45); box-shadow: inset 0 0 0 2px #ffffff; }
+.agua    { background: rgba(40, 110, 220, 0.7); }
+/* ---------- Novos Blocos Naturais ---------- */
+.neve         { background: #ffffff; box-shadow: inset 0 0 0 2px #e0e0e0; }
+.cacto        { background: repeating-linear-gradient(0deg, #2e7d32 0 4px, #1b5e20 4px 8px); }
+.argila       { background: #b35936; }
+.tronco-claro { background: repeating-linear-gradient(90deg, #e8d8b0 0 4px, #d4c298 4px 8px); }
+
+/* ---------- Novos Blocos Coloridos e Minérios ---------- */
+.ouro         { background: linear-gradient(135deg, #ffd700 0%, #ffae00 100%); box-shadow: inset 0 0 0 2px #fff3a1; }
+.diamante     { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); box-shadow: inset 0 0 0 2px #e0ffff; }
+.lapis        { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+.lava         { background: linear-gradient(0deg, #d32f2f 0%, #f57c00 70%, #ffeb3b 100%); }
+.cogumelo     { background: #d32f2f; box-shadow: inset -4px -4px 0 0 #ffffff, inset 4px 4px 0 0 #ffffff; }
+
+/* ---------- Nuvens ---------- */
+.nuvem {
+  position: absolute;
+  height: 8%;
+  background: #ffffff;
+  border-radius: 20px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.n1 { width: 14%; top: 8%;  animation: passar 40s linear infinite; }
+.n2 { width: 10%; top: 22%; animation: passar 55s linear infinite; animation-delay: -20s; }
+
+/* ---------- Menu inicial ---------- */
+.menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.menu.escondido {
+  display: none;
+}
+
+.menu-titulo {
+  font-size: 2.4rem;
+  margin: 0;
+}
+
+.menu p {
+  margin: 0 0 6px;
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #ffffff;
+  background: #7a7a7a;
+  border: 3px solid #1e1e1e;
+  border-bottom-width: 6px;           /* efeito de botão "alto" */
+  padding: 10px 28px;
+  min-width: 240px;
+  cursor: pointer;
+  text-shadow: 2px 2px 0 #333333;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.botao:hover {
+  background: #8f9fd8;
+  transform: scale(1.05);
+}
+
+.botao:active {
+  transform: translateY(3px);
+  border-bottom-width: 3px;
+}
+
+.botao-verde {
+  background: #4c9a2a;
+}
+
+.botao-verde:hover {
+  background: #66c23a;
+}
+
+.botao.pequeno {
+  font-size: 0.95rem;
+  min-width: 0;
+  padding: 6px 12px;
+}
+
+.botao.ativo {
+  background: #e0a800;
+  color: #1e1e1e;
+  text-shadow: none;
+}
+
+/* ---------- Barra de ferramentas ---------- */
+.barra {
+  display: none;                      /* só aparece depois de iniciar */
+  max-width: 960px;
+  margin: 10px auto 0;
+  padding: 10px;
+  background: #3b3b3b;
+  border: 3px solid #1e1e1e;
+  border-radius: 6px;
+}
+
+.barra.visivel {
+  display: block;
+}
+
+.ferramentas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.blocos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.item {
+  width: 44px;
+  height: 44px;
+  border: 3px solid #1e1e1e;
+}
+
+.item.ativo {
+  border-color: #ffffff;
+  transform: scale(1.15);
+}
+
+.dica {
+  font-size: 0.9rem;
+  color: #cfcfcf;
+}
+
+/* ---------- Vídeo ---------- */
+.video-caixa {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  margin: 10px auto;
+  aspect-ratio: 16 / 9;               /* mantém a proporção do vídeo */
+  border: 6px solid #5a3a1a;
+}
+
+.video-caixa iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ---------- Rodapé ---------- */
+footer {
+  padding: 16px;
+  background: #1a1a1a;
+  color: #aaaaaa;
+  font-size: 0.9rem;
+}
+
+/* ---------- Animações ---------- */
+@keyframes flutuar {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes girar {
+  0%, 100% { transform: rotate(-6deg); }
+  50%      { transform: rotate(6deg); }
+}
+
+@keyframes passar {
+  from { left: -20%; }
+  to   { left: 110%; }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 600px) {
+  h1 { font-size: 1.8rem; }
+  .menu-titulo { font-size: 1.6rem; }
+  .botao { min-width: 180px; font-size: 1rem; padding: 8px 16px; }
+  .menu { gap: 6px; }
+  .menu p { font-size: 0.85rem; }
+}
